@@ -18,7 +18,7 @@
 #include "vision_utils.hpp"
 
 class SystemNode
-    :public rclcpp::Node, public QObject
+    :public QObject, public rclcpp::Node
 {
     Q_OBJECT
 public:
@@ -31,9 +31,9 @@ private:
     image_transport::Subscriber m_processed_iamge_subscriber;
     YAML::Node m_config = YAML::LoadFile("../../config.yaml");
 Q_SIGNALS:
-    void processed_image_received(const sensor_msgs::msg::Image::ConstSharedPtr&);
+    void processed_image_received(const sensor_msgs::msg::Image::ConstSharedPtr& image);
 Q_SIGNALS:
-    void log_received(const ros_msg::msg::Log::ConstSharedPtr&);
+    void log_received(const ros_msg::msg::Log::ConstSharedPtr& log);
 };
 
 #endif // !_SYSTEM_NODE_HPP_

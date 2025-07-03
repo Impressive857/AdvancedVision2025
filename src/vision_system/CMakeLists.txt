@@ -44,7 +44,7 @@ find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 include_directories(${PROJECT_SOURCE_DIR}/../vision_utils)
 include_directories(${EXEC_INCLUDE_DIR}/${PROJECT_NAME})
 
-ament_auto_add_executable(${PROJECT_NAME}_node ${EXEC_SOURCES} ${EXEC_INCLUDE_DIR}/${PROJECT_NAME}/vision_system.hpp)
+ament_auto_add_executable(${PROJECT_NAME}_node ${EXEC_SOURCES} ${EXEC_INCLUDE_DIR}/${PROJECT_NAME}/vision_system.hpp ${EXEC_INCLUDE_DIR}/${PROJECT_NAME}/system_node.hpp)
 ament_target_dependencies(${PROJECT_NAME}_node ${EXEC_DEPEND})
 
 target_link_libraries(${PROJECT_NAME}_node

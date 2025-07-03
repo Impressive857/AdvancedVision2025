@@ -37,7 +37,7 @@ public:
     ~NnDetector();
 protected:
     bool init();
-    const cv::Mat& preprocess_img(const cv::Mat& img);
+    cv::Mat preprocess_img(const cv::Mat& img);
     void release_resource();
     bool m_is_ok = false;
     bool m_model_has_load = false;

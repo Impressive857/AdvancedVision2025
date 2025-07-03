@@ -11,7 +11,7 @@ public:
     void init() override;
     void add_calculation_data(const ros_msg::msg::CalculationData& calculation_data) override;
     void calculate_result() override;
-    const std::string& get_result() override;
+    std::string get_result() override;
     ~MeasureMode() override;
 private:
 };

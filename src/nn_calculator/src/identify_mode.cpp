@@ -12,7 +12,7 @@ void IdentifyMode::calculate_result()
 {
 }
 
-const std::string& IdentifyMode::get_result()
+std::string IdentifyMode::get_result()
 {
     return std::string();
 }

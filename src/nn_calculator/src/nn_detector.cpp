@@ -150,7 +150,7 @@ bool NnDetector::unload_model()
     return true;
 }
 
-const cv::Mat& NnDetector::preprocess_img(const cv::Mat& img) {
+cv::Mat NnDetector::preprocess_img(const cv::Mat& img) {
     const int model_width = m_config["model"]["input_width"].as<int>();
     const int model_height = m_config["model"]["input_height"].as<int>();
 

@@ -12,7 +12,7 @@ void MeasureMode::calculate_result()
 {
 }
 
-const std::string& MeasureMode::get_result()
+std::string MeasureMode::get_result()
 {
     return std::string();
 }
