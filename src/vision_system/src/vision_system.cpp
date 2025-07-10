@@ -1,23 +1,54 @@
 #include "vision_system.hpp"
 
 VisionSystem::VisionSystem(const std::shared_ptr<SystemNode>& system_node)
-    :QMainWindow(), m_system_node(system_node)
+    :QWidget(), m_system_node(system_node)
 {
-    m_color_video->setMinimumSize(m_config["ui"]["video_width"].as<int>(), m_config["ui"]["video_height"].as<int>());
-
-    m_logger->setMaximumBlockCount(m_config["ui"]["max_log_num"].as<int>());
-    m_logger->setReadOnly(true);
-
+    m_config = YAML::LoadFile(ament_index_cpp::get_package_share_directory("vision_utils") + "/config.yaml");
 
     connect(m_system_node.get(), &SystemNode::processed_image_received, this, &VisionSystem::on_processed_image_received);
     connect(m_system_node.get(), &SystemNode::log_received, this, &VisionSystem::on_log_received);
+    connect(m_system_node.get(), &SystemNode::result_received, this, &VisionSystem::on_result_received);
     connect(m_log_timer, &QTimer::timeout, this, &VisionSystem::on_log_timer_timeout);
 
     m_log_timer->start(1000 / m_config["log"]["log_rate"].as<int>());
 }
 
+void VisionSystem::run() {
+    this->setup_ui();
+    this->show();
+}
+
 VisionSystem::~VisionSystem() {
 
+}
+
+void VisionSystem::setup_ui()
+{
+    this->setFixedSize(m_config["ui"]["ui_wh"][0].as<int>(), m_config["ui"]["ui_wh"][1].as<int>());
+
+    m_logger->setMaximumBlockCount(m_config["ui"]["max_log_num"].as<int>());
+    m_logger->setReadOnly(true);
+    m_logger->setFixedSize(m_config["ui"]["logger_wh"][0].as<int>(), m_config["ui"]["logger_wh"][1].as<int>());
+    m_layout->addWidget(m_logger, m_config["layout"]["logger_rc"][0].as<int>(), m_config["layout"]["logger_rc"][1].as<int>());
+    m_logger->appendPlainText("logger");
+
+    m_color_video->setFixedSize(m_config["ui"]["color_video_wh"][0].as<int>(), m_config["ui"]["color_video_wh"][1].as<int>());
+    m_layout->addWidget(m_color_video, m_config["layout"]["color_video_rc"][0].as<int>(), m_config["layout"]["color_video_rc"][1].as<int>());
+
+    m_status_list->setFixedSize(m_config["ui"]["status_list_wh"][0].as<int>(), m_config["ui"]["status_list_wh"][1].as<int>());
+    for (const auto& [status_text, status] : m_status) {
+        m_status_list->addItem(status);
+    }
+    m_layout->addWidget(m_status_list, m_config["layout"]["status_list_rc"][0].as<int>(), m_config["layout"]["status_list_rc"][1].as<int>());
+
+    m_result_logger->setFixedSize(m_config["ui"]["result_logger_wh"][0].as<int>(), m_config["ui"]["result_logger_wh"][1].as<int>());
+    m_layout->addWidget(m_result_logger, m_config["layout"]["result_logger_rc"][0].as<int>(), m_config["layout"]["result_logger_rc"][1].as<int>());
+    m_result_logger->appendPlainText("result_logger");
+
+    for (const auto& [button_text, button] : m_buttons) {
+        button->setFixedSize(m_config["ui"]["button_wh"][0].as<int>(), m_config["ui"]["button_wh"][1].as<int>());
+        m_layout->addWidget(button);
+    }
 }
 
 void VisionSystem::add_log(const ros_msg::msg::Log& log)
@@ -66,6 +97,10 @@ void VisionSystem::on_processed_image_received(const sensor_msgs::msg::Image::Co
 void VisionSystem::on_log_received(const ros_msg::msg::Log::ConstSharedPtr& log)
 {
     this->add_log(*log);
+}
+
+void VisionSystem::on_result_received(const std_msgs::msg::String::ConstSharedPtr& result)
+{
 }
 
 void VisionSystem::on_log_timer_timeout()

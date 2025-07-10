@@ -26,6 +26,7 @@ set(REQUIRED_PACKAGES
   std_msgs
   ros_msg
   image_transport
+  vision_utils
 )
 
 # find dependencies
@@ -52,9 +53,11 @@ target_link_libraries(${PROJECT_NAME}_node
   Qt5::Gui
   Qt5::Widgets
   yaml-cpp
+  ${vision_utils_LIBRARIES}
 )
 
 install(TARGETS ${ALL_EXEC} DESTINATION lib/${PROJECT_NAME})
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
