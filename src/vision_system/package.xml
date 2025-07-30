@@ -9,9 +9,9 @@
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
-  <depend>ros_msg</depend>
+  <depend>ros_msgs</depend>
   <depend>std_msgs</depend>
-  <depend>image_transport</depend>
+  <depend>message_filters</depend>
   <depend>yaml-cpp</depend>
   <depend>vision_utils</depend>
 

@@ -1,0 +1,3 @@
+sensor_msgs/Image color_image
+sensor_msgs/Image depth_image
+sensor_msgs/PointCloud2 point_cloud

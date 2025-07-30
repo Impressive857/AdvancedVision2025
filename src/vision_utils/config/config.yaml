@@ -1,0 +1,76 @@
+ui:
+  ui_wh: [1600, 900]
+  logger_wh: [600, 250]
+  max_log_num: 500
+  processed_image_video_wh: [640, 480]
+  color_depth_image_video_wh: [640, 480]
+  status_list_wh: [200, 150]
+  button_wh: [200, 100]
+
+layout:
+  processed_image_video_rc: [0, 0]
+  color_depth_image_video_rc: [0, 1]
+  logger_rc: [2, 0]
+  status_list_rc: [2, 1]
+  control_rc: [2, 2]
+
+identify:
+  min_distance: 0
+  max_distance: 1
+
+network:
+  host_ip: "192.168.1.88"
+  port: 6666
+  subnet_mask: "255.255.255.0"
+  timeout: 3000
+  data_type:
+    start: 0
+    identify: 1
+    measure: 2
+    rotate: 3
+
+topic:
+  color_img_raw: "/camera/color/image_raw"
+  depth_img_raw: "/camera/depth/image_raw"
+  point_cloud: "/camera/depth/points"
+  camera_data: "camera_data"
+  log_text: "log_text"
+  result_text: "result_text"
+  processed_image: "processed_image"
+  color_depth_image: "color_depth_image"
+  mode_text: "mode_text"
+
+log:
+  log_rate: 1
+
+log_level:
+  debug: 0
+  info: 1
+  warning: 2
+  error: 3
+
+model:
+  input_num: 3
+  input_hw: [640, 480]
+
+fastsam:
+  input_shape: [1, 3, 480, 640]
+  output_shape: [[1, 37, 6300], [1, 32, 120, 160]]
+  std: [0.229, 0.224, 0.225]
+  mean: [0.485, 0.456, 0.406]
+  conf: 0.75
+  iou: 0.9
+
+segformer:
+  input_shape: [1, 3, 480, 640]
+  output_shape: [1, 150, 120, 160]
+  std: [0.229, 0.224, 0.225]
+  mean: [0.485, 0.456, 0.406]
+
+ocr_detector:
+  input_shape: [1, 3, 480, 640]
+  output_shape: [1, 1, 480, 640]
+
+ocr_recognition:
+  input_shape: [1, 3, 48, 320]
+  output_shape: [1, 40, 6625]

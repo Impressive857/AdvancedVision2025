@@ -2,7 +2,7 @@
 #include "vision_system.hpp"
 
 int main(int argc, char** argv) {
-    YAML::Node config = YAML::LoadFile(ament_index_cpp::get_package_share_directory("vision_utils") + "/config.yaml");
+    YAML::Node config = YAML::LoadFile(ament_index_cpp::get_package_share_directory("vision_utils") + "/config/config.yaml");
     rclcpp::init(argc, argv);
     QApplication app(argc, argv);
     auto system_node = std::make_shared<SystemNode>();
