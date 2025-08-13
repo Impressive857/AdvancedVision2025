@@ -104,7 +104,6 @@ private slots:
     void on_color_depth_image_received(const sensor_msgs::msg::Image::ConstSharedPtr& color_depth_image);
     void on_log_text_received(const ros_msgs::msg::Log::ConstSharedPtr& log);
     void on_result_text_received(const std_msgs::msg::String::ConstSharedPtr& result);
-    void on_mode_text_received(const std_msgs::msg::String::ConstSharedPtr& mode);
     void on_log_timer_timeout();
 };
 

@@ -83,9 +83,8 @@ FastSAM::result_t FastSAM::inference(const FastSAM::resource_t& resource) {
     }
 
     cv::Mat proto = cv::Mat(output_dim[1].dims[1], output_dim[1].dims[2] * output_dim[1].dims[3], CV_32F, output[1].data());
-    result_t result = process_output(prediction, proto);
 
-    return result;
+    return process_output(prediction, proto);
 }
 
 bool FastSAM::finalize() {
@@ -124,20 +123,18 @@ FastSAM::result_t FastSAM::process_output(const cv::Mat& prediction, const cv::M
     if (mask_num <= 0) {
         return {};
     }
-    std::vector <bbox_t> bboxes;
-    std::vector <float> confs;
+    std::vector<bbox_t> bboxes;
     bboxes.reserve(mask_num);
-    confs.reserve(mask_num);
     mask_t mask_temp;
     for (int i = 0;i < mask_num;++i) {
-        int index = indices[i];
+        const int index = indices[i];
         bbox_t& bbox_temp = bboxes_temp[index];
         bbox_temp.x = std::max(bbox_temp.x, 0);
         bbox_temp.y = std::max(bbox_temp.y, 0);
         bbox_temp.width = std::min(bbox_temp.width, m_input_width);
         bbox_temp.height = std::min(bbox_temp.height, m_input_height);
         bboxes.push_back(bbox_temp);
-        confs.push_back(confs_temp[index]);
+
         mask_temp.push_back(prediction.colRange(5, prediction.cols).rowRange(index, index + 1));
     }
     bboxes_temp.clear();

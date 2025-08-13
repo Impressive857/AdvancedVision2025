@@ -116,9 +116,7 @@ Segformer::result_t Segformer::inference(const resource_t& resource)
 
     cv::Mat prediction = cv::Mat(output_dim.dims[1], output_dim.dims[2] * output_dim.dims[3], CV_32F, output.data());
 
-    result_t result = process_output(prediction);
-
-    return result;
+    return process_output(prediction);
 }
 
 bool Segformer::finalize()

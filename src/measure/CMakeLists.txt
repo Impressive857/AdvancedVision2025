@@ -8,7 +8,7 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(EXEC_DEPEND rclcpp OpenCV cv_bridge yaml-cpp sensor_msgs ros_msgs image_transport vision_utils)
+set(EXEC_DEPEND rclcpp OpenCV cv_bridge yaml-cpp sensor_msgs ros_msgs Boost PCL pcl_conversions image_transport vision_utils)
 set(ALL_EXEC ${PROJECT_NAME}_node)
 
 set(EXEC_SRC_DIR ${PROJECT_SOURCE_DIR}/src)
@@ -26,8 +26,11 @@ set(REQUIRED_PACKAGES
   yaml-cpp
   std_msgs
   ros_msgs
+  Boost
+  PCL
   image_transport
   vision_utils
+  pcl_conversions
 )
 
 file(GLOB_RECURSE EXEC_SOURCES "${EXEC_SRC_DIR}/*.cpp")
@@ -36,6 +39,8 @@ file(GLOB_RECURSE EXEC_SOURCES "${EXEC_SRC_DIR}/*.cpp")
 foreach(PKG ${REQUIRED_PACKAGES})
   find_package(${PKG} REQUIRED)
 endforeach()
+
+find_package(Boost REQUIRED COMPONENTS system thread)
 
 # uncomment the following section in order to fill in
 # further dependencies manually.

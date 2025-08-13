@@ -12,7 +12,6 @@
 #include <opencv2/opencv.hpp>
 
 struct vision_utils {
-    using nchw_data_t = std::vector<float>;
 
     enum class LogLevel : int32_t {
         DEBUG,
@@ -90,6 +89,61 @@ struct vision_utils {
         return res;
     }
 
+    static cv::Mat resize_with_padding(const cv::Mat& image, int width, int height) {
+        float scale_w = (float)width / image.cols;
+        float scale_h = (float)height / image.rows;
+        float scale = std::min(scale_w, scale_h);
+
+        cv::Mat scaled_img;
+        cv::resize(image, scaled_img, cv::Size(), scale, scale, cv::INTER_LINEAR);
+
+        int pad_w = width - scaled_img.cols;
+        int pad_h = height - scaled_img.rows;
+        int top = pad_h / 2;
+        int bottom = pad_h - top;
+        int left = pad_w / 2;
+        int right = pad_w - left;
+
+        cv::Mat padded_img;
+        cv::copyMakeBorder(scaled_img, padded_img, top, bottom, left, right, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+
+        return padded_img;
+    }
+
+    static cv::Mat depth2rgb(const cv::Mat& depth_image, float min_distance, float max_distance) {
+        cv::Mat rgb_image;
+        depth_image.convertTo(rgb_image, CV_32FC1, 0.001);
+
+        cv::Mat mask = rgb_image < min_distance;
+        rgb_image.setTo(min_distance, mask);
+        mask = rgb_image > max_distance;
+        rgb_image.setTo(max_distance, mask);
+
+        cv::Mat normalized_depth;
+        cv::normalize(rgb_image, normalized_depth, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+
+        cv::applyColorMap(normalized_depth, rgb_image, cv::COLORMAP_JET);
+
+        cv::cvtColor(rgb_image, rgb_image, cv::COLOR_BGR2RGB);
+
+        return rgb_image;
+    }
+
+    using mat_vec_fp32_t = std::vector<std::vector<float>>;
+    static mat_vec_fp32_t mat2vector_fp32(const cv::Mat& mat) noexcept {
+        mat_vec_fp32_t image_vec;
+
+        for (int i = 0; i < mat.rows; ++i) {
+            std::vector<float> temp;
+            for (int j = 0; j < mat.cols; ++j) {
+                temp.emplace_back(mat.at<float>(i, j));
+            }
+            image_vec.emplace_back(std::move(temp));
+        }
+        return image_vec;
+    }
+
+    using nchw_data_t = std::vector<float>;
     static nchw_data_t mat2nchw(const cv::Mat& image) {
         size_t chw_size = 3 * image.cols * image.rows;
         nchw_data_t nchw_data(chw_size);
@@ -105,36 +159,6 @@ struct vision_utils {
 
         return nchw_data;
     }
-
-    static cv::Mat depth2rgb(const cv::Mat& depth_image, float min_distance, float max_distance) {
-        cv::Mat rgb_image;
-        depth_image.convertTo(rgb_image, CV_32FC1, 0.001);
-
-        cv::Mat mask = (rgb_image > min_distance) & (rgb_image < max_distance);
-
-        cv::Mat normalized_depth;
-        cv::normalize(rgb_image, normalized_depth, 0, 255, cv::NORM_MINMAX, CV_8UC1, mask);
-
-        cv::applyColorMap(normalized_depth, rgb_image, cv::COLORMAP_JET);
-
-        if (!mask.empty())
-        {
-            cv::Mat alpha_channel = cv::Mat::zeros(normalized_depth.size(), CV_8UC1);
-            alpha_channel.setTo(255, mask);
-
-            std::vector<cv::Mat> channels;
-            cv::split(rgb_image, channels);
-            channels.push_back(alpha_channel);
-            cv::merge(channels, rgb_image);
-        }
-
-        cv::cvtColor(rgb_image, rgb_image, cv::COLOR_BGR2RGB);
-
-        return rgb_image;
-    }
-
-    
-
 };
 
 #endif // !_VISION_UTILS_CPP_

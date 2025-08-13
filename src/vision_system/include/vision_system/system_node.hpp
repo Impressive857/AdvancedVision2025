@@ -39,7 +39,6 @@ private:
     rclcpp::TimerBase::SharedPtr m_log_timer;
     rclcpp::Subscription<ros_msgs::msg::Log>::SharedPtr m_log_text_subscription;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr m_result_text_subscription;
-    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr m_mode_text_subscription;
     rclcpp::Publisher<ros_msgs::msg::CameraData>::SharedPtr m_camera_data_publisher;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr m_processed_image_subscription;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr m_color_depth_image_subscription;
@@ -56,8 +55,6 @@ Q_SIGNALS:
     void log_text_received(const ros_msgs::msg::Log::ConstSharedPtr& log);
 Q_SIGNALS:
     void result_text_received(const std_msgs::msg::String::ConstSharedPtr& result);
-Q_SIGNALS:
-    void mode_text_received(const std_msgs::msg::String::ConstSharedPtr& mode);
 };
 
 #endif // !_SYSTEM_NODE_HPP_

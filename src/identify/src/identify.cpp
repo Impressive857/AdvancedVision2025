@@ -19,11 +19,6 @@ Identify::Identify()
         1
     );
 
-    m_mode_text_publisher = this->create_publisher<std_msgs::msg::String>(
-        m_config["topic"]["mode_text"].as<std::string>(),
-        1
-    );
-
     m_processed_image_publisher = this->create_publisher<sensor_msgs::msg::Image>(
         m_config["topic"]["processed_image"].as<std::string>(),
         10
@@ -42,7 +37,19 @@ Identify::Identify()
     m_min_distance = m_config["identity"]["min_distance"].as<float>();
     m_max_distance = m_config["identity"]["max_distance"].as<float>();
 
+    m_min_area = m_config["identity"]["min_area"].as<int>();
+    m_max_area = m_config["identity"]["max_area"].as<int>();
+
+    m_result_timer = this->create_wall_timer(
+        std::chrono::seconds(m_config["identify"]["result_time"].as<int>()),
+        std::bind(&Identify::result_timer_cbfn, this)
+    );
+
+    this->declare_parameter("round", 1);
+    m_current_round = this->get_parameter("round").as_int();
+
     m_ready.store(false);
+    m_finish.store(false);
 }
 
 Identify::~Identify() {
@@ -61,9 +68,6 @@ void Identify::init() {
     success &= m_segformer.load_model(segformer_model_path);
     success &= m_segformer.init();
     m_logger->publish(vision_utils::create_log(this->now(), success ? vision_utils::LogLevel::INFO : vision_utils::LogLevel::ERROR, "segformer load %s!", success ? "success" : "failed"));
-    std_msgs::msg::String mode_text;
-    mode_text.data = "identify";
-    m_mode_text_publisher->publish(mode_text);
     m_ready.store(success);
 }
 
@@ -79,7 +83,7 @@ void Identify::finalize() {
 
 void Identify::camera_data_received_cbfn(const ros_msgs::msg::CameraData::ConstSharedPtr& camera_data)
 {
-    if (!m_ready.load()) {
+    if (!m_ready.load() && m_finish.load()) {
         return;
     }
     try {
@@ -90,10 +94,10 @@ void Identify::camera_data_received_cbfn(const ros_msgs::msg::CameraData::ConstS
         Segformer::result_t segformer_result = m_segformer.inference(color_image_ptr->image);
         detection_t detection;
         cv::Mat processed_image = color_image_ptr->image.clone();
-        cv::cvtColor(processed_image, processed_image, cv::COLOR_RGB2BGR);
         for (const auto& [mask, bbox] : fastsam_result) {
-            cv::rectangle(processed_image, bbox, cv::Scalar(0, 0, 255), 5);
-            if (!segformer_result.empty()) {
+            int area = cv::countNonZero(mask);
+            if (!segformer_result.empty() && area > m_min_area && area < m_max_area) {
+                cv::rectangle(processed_image, bbox, cv::Scalar(0, 0, 255), 5);
                 cv::Mat hist;
                 const int hist_size = 256;
                 std::vector<cv::Mat> hist_input{ segformer_result };
@@ -111,13 +115,13 @@ void Identify::camera_data_received_cbfn(const ros_msgs::msg::CameraData::ConstS
             }
         }
         if (!detection.empty()) {
+            std::lock_guard<std::mutex> lock(m_detection_lock);
             m_detections.push_back(detection);
         }
 
         std_msgs::msg::Header header;
         header.stamp = this->now();
         header.frame_id = "processed_image";
-        cv::cvtColor(processed_image, processed_image, cv::COLOR_BGR2RGB);
         sensor_msgs::msg::Image::SharedPtr processed_image_msg = cv_bridge::CvImage(header, "rgb8", processed_image).toImageMsg();
         m_processed_image_publisher->publish(*processed_image_msg);
 
@@ -131,5 +135,26 @@ void Identify::camera_data_received_cbfn(const ros_msgs::msg::CameraData::ConstS
     }
     catch (const cv::Exception& e) {
         m_logger->publish(vision_utils::create_log(this->now(), vision_utils::LogLevel::ERROR, e.what()));
+    }
+}
+
+void Identify::result_timer_cbfn()
+{
+    m_finish.store(true);
+    std::lock_guard<std::mutex> lock(m_detection_lock);
+    std::string result_str;
+    std_msgs::msg::String result_msg;
+    switch (m_current_round) {
+    case 1: {
+        const int detection_round = m_detections.size();
+
+        break;
+    }
+    case 2: {
+        break;
+    }
+    default: {
+        break;
+    }
     }
 }

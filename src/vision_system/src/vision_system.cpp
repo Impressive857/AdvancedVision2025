@@ -9,9 +9,19 @@ VisionSystem::VisionSystem(const std::shared_ptr<SystemNode>& system_node)
     connect(m_system_node.get(), &SystemNode::color_depth_image_received, this, &VisionSystem::on_color_depth_image_received);
     connect(m_system_node.get(), &SystemNode::log_text_received, this, &VisionSystem::on_log_text_received);
     connect(m_system_node.get(), &SystemNode::result_text_received, this, &VisionSystem::on_result_text_received);
-    connect(m_system_node.get(), &SystemNode::mode_text_received, this, &VisionSystem::on_mode_text_received);
     connect(m_log_timer, &QTimer::timeout, this, &VisionSystem::on_log_timer_timeout);
     connect(m_buttons.at("reconnect"), &QPushButton::clicked, this, &VisionSystem::init_network);
+
+    m_system_node->declare_parameter("mode", "unkonw");
+    m_current_mode = m_system_node->get_parameter("mode").as_string();
+    m_status.at("mode")->setText(QString::fromStdString("mode : " + m_current_mode));
+    if ("unknow" != m_current_mode) {
+        m_status.at("mode")->setForeground(Qt::green);
+        this->add_log(vision_utils::create_log(m_system_node->now(), vision_utils::LogLevel::INFO, "mode get success!"));
+    }
+    else {
+        this->add_log(vision_utils::create_log(m_system_node->now(), vision_utils::LogLevel::ERROR, "mode get failed!"));
+    }
 
     m_log_timer->start(1000 / m_config["log"]["log_rate"].as<int>());
 }
@@ -172,14 +182,6 @@ void VisionSystem::on_result_text_received(const std_msgs::msg::String::ConstSha
     }
 
     m_socket->waitForBytesWritten();
-}
-
-void VisionSystem::on_mode_text_received(const std_msgs::msg::String::ConstSharedPtr& mode)
-{
-    m_current_mode = mode->data;
-    m_status.at("mode")->setText(QString::fromStdString("mode : " + m_current_mode));
-    m_status.at("mode")->setForeground(Qt::green);
-    this->add_log(vision_utils::create_log(m_system_node->now(), vision_utils::LogLevel::INFO, "mode text received!"));
 }
 
 void VisionSystem::on_log_timer_timeout()

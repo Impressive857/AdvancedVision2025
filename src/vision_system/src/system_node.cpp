@@ -34,12 +34,6 @@ SystemNode::SystemNode()
         [this](const std_msgs::msg::String::ConstSharedPtr& result) {Q_EMIT result_text_received(result);}
     );
 
-    m_mode_text_subscription = this->create_subscription<std_msgs::msg::String>(
-        m_config["topic"]["mode_text"].as<std::string>(),
-        1,
-        [this](const std_msgs::msg::String::ConstSharedPtr& mode) {Q_EMIT mode_text_received(mode);}
-    );
-
     m_camera_data_publisher = this->create_publisher<ros_msgs::msg::CameraData>(
         m_config["topic"]["camera_data"].as<std::string>(),
         10

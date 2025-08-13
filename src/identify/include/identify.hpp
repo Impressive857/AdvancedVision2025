@@ -1,6 +1,7 @@
 #ifndef _IDENTIFY_HPP_
 #define _IDENTIFY_HPP_
 
+// model
 #include "fastsam.hpp"
 #include "segformer.hpp"
 
@@ -39,18 +40,25 @@ private:
     void init();
     void finalize();
     void camera_data_received_cbfn(const ros_msgs::msg::CameraData::ConstSharedPtr& camera_data);
+    void result_timer_cbfn();
 private:
+    const std::vector<std::string> m_id2string{};
     FastSAM m_fastsam;
     Segformer m_segformer;
     rclcpp::Subscription<ros_msgs::msg::CameraData>::SharedPtr m_camera_data_subscription;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr m_result_text_publisher;
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr m_mode_text_publisher;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr m_processed_image_publisher;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr m_color_depth_image_publisher;
     rclcpp::Publisher<ros_msgs::msg::Log>::SharedPtr m_logger;
+    rclcpp::TimerBase::SharedPtr m_result_timer;
+    std::mutex m_detection_lock;
+    int m_current_round;
     float m_min_distance;
     float m_max_distance;
+    int m_min_area;
+    int m_max_area;
     std::atomic<bool> m_ready;
+    std::atomic<bool> m_finish;
     detections_t m_detections;
     YAML::Node m_config;
 };

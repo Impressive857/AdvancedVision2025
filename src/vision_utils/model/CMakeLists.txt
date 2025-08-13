@@ -22,6 +22,7 @@ endforeach()
 
 include_directories(${ASCEND_CL_INCLUDE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/../utils/include)
+include_directories(${PROJECT_SOURCE_DIR}/../3rdparty/include)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
