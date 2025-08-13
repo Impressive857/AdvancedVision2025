@@ -89,12 +89,14 @@ void Measure::camera_data_received_cbfn(const ros_msgs::msg::CameraData::ConstSh
         if (!yolov8_result.empty()) {
             detections detects;
             cv::Mat image = color_image_ptr->image;
+            cv::Mat processed_image = color_image_ptr->image.clone();
             if (points_mat.cols() < 800000) {
                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
                 pcl::fromROSMsg<pcl::PointXYZ>(camera_data->point_cloud, *cloud);
                 pixelPointMap(cloud);
             }
             for (const auto& [label, bbox] : yolov8_result) {
+                cv::rectangle(processed_image, bbox, cv::Scalar(0, 0, 0));
                 detection detect;
                 detect.label = label;
                 int x, y, w, h;
